@@ -21,8 +21,8 @@ target
 #.idea/
 
 # Compiler files
-cache/
-out/
+*/cache/
+*/out/
 
 # Commonly ignored directories
 */.logs/
