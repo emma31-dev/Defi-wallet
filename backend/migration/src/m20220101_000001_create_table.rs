@@ -5,11 +5,12 @@ pub struct Migration;
 
 #[async_trait::async_trait]
 impl MigrationTrait for Migration {
-    async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+    #[allow(unused)]
+    async fn up(&self, managers: &SchemaManager) -> Result<(), DbErr> {
         // Replace the sample below with your own migration scripts
         todo!();
 
-        manager
+        managers
             .create_table(
                 Table::create()
                     .table(Post::Table)
@@ -22,6 +23,7 @@ impl MigrationTrait for Migration {
             .await
     }
 
+    #[allow(unused)]
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         // Replace the sample below with your own migration scripts
         todo!();
