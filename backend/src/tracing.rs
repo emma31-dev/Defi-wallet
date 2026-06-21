@@ -1,14 +1,11 @@
-use tracing_appender::rolling::{RollingFileAppender, Rotation};
+use tracing_appender::{rolling::daily, non_blocking};
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
+use tracing::Level;
 
-pub fn init_tracing() {
-    let file_appender = RollingFileAppender::builder()
-        .rotation(Rotation::DAILY)
-        .filename_suffix("app.log")
-        .build("/log")
-        .expect("Failed to build rolling file appender");
+pub fn init_logging() {
+    let file_appender = daily("/../logs", "app.log");
 
-    let (non_blocking, _guard) = tracing_appender::non_blocking(file_appender);
+    let (non_blocking, _guard) = non_blocking(file_appender);
 
     let file_layer = fmt::layer()
         .with_writer(non_blocking)
@@ -26,7 +23,7 @@ pub fn init_tracing() {
         .with_line_number(true);
 
     // 6. Set up the subscriber with environment filter
-    let env_filter = EnvFilter::from_default_env().add_directive("my_crate=trace".parse().unwrap());
+    let env_filter = EnvFilter::from_default_env().add_directive(Level::DEBUG.into());
 
     // 7. Register the subscriber
     tracing_subscriber::registry()

@@ -23,7 +23,6 @@ alloy = "2.1.0"
 anyhow = "1.0.102"
 axum = "0.8.9"
 jsonwebtoken = "10.4.0"
-orso = "0.0.2"
 serde = { version = "1.0.228", features = ["derive"] }
 tokio = { version = "1.52.3", features = ["full"] }
 tracing = "0.1.44"

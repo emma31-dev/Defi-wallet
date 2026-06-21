@@ -1,12 +1,12 @@
 use anyhow::{Result, anyhow};
 use bwb::routes::app;
-use bwb::tracing::init_tracing;
+use bwb::tracing::init_logging;
 use tracing::info;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // initialize tracing
-    init_tracing();
+    // initialize logging
+    init_logging();
     info!("Server starting...");
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await?;

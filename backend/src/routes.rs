@@ -11,7 +11,5 @@ pub async fn app() -> Router {
         .connect()
         .expect("Failed to load connection with database");
 
-    Router::new()
-        .route("/ok", get(ok))
-        .with_state(conn)
+    Router::new().route("/ok", get(ok)).with_state(conn)
 }
