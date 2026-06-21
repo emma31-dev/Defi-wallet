@@ -1,7 +1,8 @@
-use anyhow::{Result, anyhow};
+use anyhow::{Context, Result};
 use bwb::routes::app;
 use bwb::tracing::init_logging;
 use tracing::info;
+use turso::Builder;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -9,12 +10,16 @@ async fn main() -> Result<()> {
     init_logging();
     info!("Server starting...");
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await?;
-    axum::serve(listener, app().await)
+    let db = Builder::new_local("../db/app.db")
+        .build()
         .await
-        .map(|a| {
-            info!("Server has started.");
-            a
-        })
-        .map_err(|e| anyhow!("Server failed to start, {:?}", e))
+        .expect("Failed to load db");
+    let conn = db
+        .connect()
+        .expect("Failed to load connection with database");
+
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await?;
+    axum::serve(listener, app(conn).await)
+        .await
+        .context("Server failed to start")
 }

@@ -1,15 +1,7 @@
 use super::handlers::ok;
 use axum::{Router, routing::get};
-use turso::Builder;
+use turso::Connection;
 
-pub async fn app() -> Router {
-    let db = Builder::new_local("../db/app.db")
-        .build()
-        .await
-        .expect("Failed to load db");
-    let conn = db
-        .connect()
-        .expect("Failed to load connection with database");
-
+pub async fn app(conn: Connection) -> Router {
     Router::new().route("/ok", get(ok)).with_state(conn)
 }

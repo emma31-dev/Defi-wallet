@@ -1,9 +1,9 @@
-use tracing_appender::{rolling::daily, non_blocking};
-use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 use tracing::Level;
+use tracing_appender::{non_blocking, rolling::daily};
+use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
 pub fn init_logging() {
-    let file_appender = daily("/../logs", "app.log");
+    let file_appender = daily("../logs", "app.log");
 
     let (non_blocking, _guard) = non_blocking(file_appender);
 
@@ -22,10 +22,8 @@ pub fn init_logging() {
         .with_target(true)
         .with_line_number(true);
 
-    // 6. Set up the subscriber with environment filter
-    let env_filter = EnvFilter::from_default_env().add_directive(Level::DEBUG.into());
+    let env_filter = EnvFilter::from_default_env().add_directive(Level::INFO.into());
 
-    // 7. Register the subscriber
     tracing_subscriber::registry()
         .with(env_filter)
         .with(file_layer)
