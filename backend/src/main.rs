@@ -13,10 +13,10 @@ async fn main() -> Result<()> {
     let db = Builder::new_local("../db/app.db")
         .build()
         .await
-        .expect("Failed to load db");
+        .context("Failed to load db")?;
     let conn = db
         .connect()
-        .expect("Failed to load connection with database");
+        .context("Failed to load connection with database")?;
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await?;
     axum::serve(listener, app(conn).await)

@@ -1,4 +1,4 @@
-use axum::{self, http::StatusCode};
+use axum::http::StatusCode;
 
 pub async fn ok<'a>() -> (StatusCode, &'a str) {
     (StatusCode::OK, "Ok")
