@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
+import {Ownable} from "../lib/openzeppelin-contracts/contracts/access/Ownable.sol";
 
-contract Wallet {
-    address public owner;
-    uint256 private pool_balance;
-    mapping (address => uint256) public user_balances;
+contract Wallet is Ownable {
+    mapping (address => uint256) private pool_balances;
+    mapping (address => mapping (address => uint256)) public user_balances;
 
-    event Tranfer(uint256 _amount, address _from, address _to);
-    event Deposit(uint256 _amount, address _user);
-    event Withdraw(uint256 _amount, address _user);
+    event Tranfer(address token, uint256 _amount, address _from, address _to);
+    event Deposit(address token, uint256 _amount, address _user);
+    event Withdraw(address token, uint256 _amount, address _user);
 
     constructor(address _owner) {
         owner = _owner;
@@ -25,10 +25,10 @@ contract Wallet {
         _;
     }
 
-    function deposit() public payable {
+    function deposit(address _token) public payable {
         require(msg.value > 0);
-        user_balances[msg.sender] += msg.value;
-        pool_balance += msg.value;
+        user_balances[msg.sender][_token] += msg.value;
+        pool_balances[_token] += msg.value;
         emit Deposit(msg.value, msg.sender);
     }
 

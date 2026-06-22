@@ -1,3 +1,5 @@
+pub mod event;
+
 use axum::http::StatusCode;
 
 pub async fn ok<'a>() -> (StatusCode, &'a str) {
