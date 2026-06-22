@@ -11,8 +11,7 @@ use bwb::handlers::event::listen;
 async fn main() -> Result<()> {
     // initialize logging
     init_logging();
-    info!("Server starting...");
-
+    
     let db = Builder::new_local("../db/app.db")
         .build()
         .await
@@ -28,10 +27,20 @@ async fn main() -> Result<()> {
     };
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await?;
-    axum::serve(listener, app(state).await)
-        .await
-        .context("Server failed to start")?;
-    tokio::spawn(async move {
-        let _ = listen(rx).await;
-    }).await.context("Failed to spawn contract listener")
+
+    futures::join!(
+        async { 
+            info!("Server starting...");
+            axum::serve(listener, app(state).await)
+            .await
+            .expect("Server failed to start");
+        },
+        async {
+            info!("Event listener starting...");
+            tokio::spawn(async move {
+                let _ = listen(rx).await;
+            }).await.expect("Failed to spawn contract listener");
+        }
+    );
+    Ok(())
 }
