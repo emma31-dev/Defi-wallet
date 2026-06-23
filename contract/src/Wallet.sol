@@ -7,7 +7,7 @@ contract Wallet {
     mapping (address => uint256) private pool_balances;
     mapping (address => mapping (address => uint256)) public user_balances;
 
-    event Tranfer(address token, uint256 _amount, address _from, address _to);
+    event Transfer(address token, uint256 _amount, address _from, address _to);
     event Deposit(address token, uint256 _amount, address _user);
     event Withdraw(address token, uint256 _amount, address _user);
 
