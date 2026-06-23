@@ -1,5 +1,5 @@
-use crate::structures::AppState;
 use super::handlers::ok;
+use crate::structures::AppState;
 use axum::{Router, routing::get};
 
 pub async fn app(state: AppState) -> Router {

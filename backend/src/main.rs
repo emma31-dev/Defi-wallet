@@ -1,17 +1,16 @@
 use anyhow::{Context, Result};
+use bwb::handlers::event::listen;
 use bwb::routes::app;
+use bwb::structures::AppState;
 use bwb::tracing::init_logging;
 use tracing::info;
 use turso::Builder;
-use alloy::rpc::types::Log;
-use bwb::structures::AppState;
-use bwb::handlers::event::listen;
 
 #[tokio::main]
 async fn main() -> Result<()> {
     // initialize logging
     init_logging();
-    
+
     let db = Builder::new_local("../db/app.db")
         .build()
         .await
@@ -20,27 +19,22 @@ async fn main() -> Result<()> {
         .connect()
         .context("Failed to load connection with database")?;
 
-    let (tx, rx) = tokio::sync::mpsc::channel::<Log>(100);
-    let state = AppState {
-        db_conn: conn,
-        event_sender: tx,
-    };
+    // let (tx, rx) = tokio::sync::mpsc::channel::<Log>(100);
+    let state = AppState { db_conn: conn };
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await?;
 
-    futures::join!(
-        async { 
+    futures::try_join!(
+        async {
             info!("Server starting...");
             axum::serve(listener, app(state).await)
-            .await
-            .expect("Server failed to start");
+                .await
+                .context("Server failed to start")
         },
         async {
-            info!("Event listener starting...");
-            tokio::spawn(async move {
-                let _ = listen(rx).await;
-            }).await.expect("Failed to spawn contract listener");
+            info!("Contract Event listener starting...");
+            listen().await.context("Failed to init listener")
         }
-    );
+    )?;
     Ok(())
 }
