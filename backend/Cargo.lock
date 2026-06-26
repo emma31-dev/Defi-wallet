@@ -1255,6 +1255,7 @@ dependencies = [
  "alloy",
  "anyhow",
  "axum",
+ "dotenvy",
  "futures",
  "jsonwebtoken",
  "serde",

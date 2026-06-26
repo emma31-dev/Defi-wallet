@@ -1,0 +1,19 @@
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.13;
+
+import {Script} from "../lib/forge-std/src/Script.sol";
+import {Wallet} from "../src/Wallet.sol";
+
+contract WalletScript is Script {
+    Wallet public wallet;
+
+    function setUp() public {}
+
+    function run() public {
+        vm.startBroadcast();
+
+        wallet = new Wallet();
+
+        vm.stopBroadcast();
+    }
+}
