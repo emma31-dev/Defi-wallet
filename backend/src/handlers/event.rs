@@ -31,14 +31,19 @@ pub async fn deposit_listener(config: &EnvVariables) -> Result<()> {
     let address = Address::from_str(&config.contract_add).context("Failed to serialize address")?;
     let contract = Wallet::new(address, &provider);
     // 2. Subscribe to Transfer events (or any custom event)
-    let filter = contract.Deposit_filter().filter;
+    let filter = contract.event_filter::<Wallet::Deposit>().filter;
     info!("Has topics: {}", filter.has_topics());
     let subscription = provider.watch_logs(&filter).await?;
     info!("Subscribed to Deposit events");
-    let mut stream = subscription
-        .into_stream()
-        .flat_map(futures::stream::iter)
-        .take(5);
+    let mut stream = subscription.into_stream().flat_map(futures::stream::iter);
+
+    // Optional: fetch past deposits
+    if let Ok(past) = provider.get_logs(&filter).await {
+        info!("Found {} past deposits", past.len());
+        for log in past {
+            info!("Past deposit data: {}", log.inner.address);
+        }
+    }
 
     // 3. Loop forever, processing events
     while let Some(log) = stream.next().await {
@@ -60,10 +65,7 @@ pub async fn withdraw_listener(config: &EnvVariables) -> Result<()> {
     // 2. Subscribe to Transfer events (or any custom event)
     let filter = contract.Deposit_filter().filter;
     let subscription = provider.watch_logs(&filter).await?;
-    let mut stream = subscription
-        .into_stream()
-        .flat_map(futures::stream::iter)
-        .take(5);
+    let mut stream = subscription.into_stream().flat_map(futures::stream::iter);
 
     // 3. Loop forever, processing events
     while let Some(log) = stream.next().await {
