@@ -13,8 +13,8 @@ pub fn init_logging() {
         .with_target(true)
         .with_line_number(true)
         .with_level(true);
-        // .with_thread_ids(true)
-        // .with_thread_names(true);
+    // .with_thread_ids(true)
+    // .with_thread_names(true);
 
     let console_layer = fmt::layer()
         .with_writer(std::io::stdout)

@@ -21,7 +21,10 @@ async fn main() -> Result<()> {
         .context("Failed to load connection with database")?;
 
     // let (tx, rx) = tokio::sync::mpsc::channel::<Log>(100);
-    let state = AppState { db_conn: conn, config: config.clone() };
+    let state = AppState {
+        db_conn: conn,
+        config: config.clone(),
+    };
 
     let listener = tokio::net::TcpListener::bind(&config.socket).await?;
 

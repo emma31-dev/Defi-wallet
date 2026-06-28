@@ -1,11 +1,12 @@
-use std::str::FromStr;
 use alloy::{
     primitives::{Address, utils::format_ether},
     providers::{Provider, ProviderBuilder},
-    sol, sol_types::SolEvent,
+    sol,
+    sol_types::SolEvent,
 };
 use anyhow::{Context, Result};
 use futures::StreamExt;
+use std::str::FromStr;
 use tracing::{error, info, warn};
 
 use crate::structures::EnvVariables;
@@ -27,11 +28,15 @@ pub async fn deposit_listener(config: &EnvVariables) -> Result<()> {
         .await
         .context("Failed to connect to rpc provider")?;
 
-    let address = Address::from_str(&config.contract_add).context("Failed to serialize address for environmental variables")?;
+    let address = Address::from_str(&config.contract_add)
+        .context("Failed to serialize address for environmental variables")?;
     let contract = Wallet::new(address, &provider);
     // Subscribe to Transfer events (or any custom event)
     let filter = contract.event_filter::<Wallet::Deposit>().filter;
-    let subscription = provider.watch_logs(&filter).await.context("Failed to subscribe to event")?;
+    let subscription = provider
+        .watch_logs(&filter)
+        .await
+        .context("Failed to subscribe to event")?;
     let mut stream = subscription.into_stream().flat_map(futures::stream::iter);
 
     // Optional: fetch past deposits
@@ -50,8 +55,11 @@ pub async fn deposit_listener(config: &EnvVariables) -> Result<()> {
         match Wallet::Deposit::decode_log(&log.inner) {
             Ok(data) => {
                 let amount = format_ether(data._amount);
-                info!("New deposit detected. Address: {}; Amount: {}ETH", data._user, amount);
-            },
+                info!(
+                    "New deposit detected. Address: {}; Amount: {}ETH",
+                    data._user, amount
+                );
+            }
             Err(e) => {
                 warn!("Error decoding deposit log: {:?}", e);
             }
@@ -91,8 +99,11 @@ pub async fn withdraw_listener(config: &EnvVariables) -> Result<()> {
         match Wallet::Withdraw::decode_log(&log.inner) {
             Ok(data) => {
                 let amount = format_ether(data._amount);
-                info!("New Withdrawal detected. Address: {}; Amount: {}ETH", data._user, amount);
-            },
+                info!(
+                    "New Withdrawal detected. Address: {}; Amount: {}ETH",
+                    data._user, amount
+                );
+            }
             Err(e) => {
                 error!("Error decoding withdrawal log: {:?}", e);
             }
@@ -132,8 +143,11 @@ pub async fn transfer_listener(config: &EnvVariables) -> Result<()> {
         match Wallet::Transfer::decode_log(&log.inner) {
             Ok(data) => {
                 let amount = format_ether(data._amount);
-                info!("New transfer detected. From: {}; To: {}; Amount: {}ETH", data._from, data._to, amount);
-            },
+                info!(
+                    "New transfer detected. From: {}; To: {}; Amount: {}ETH",
+                    data._from, data._to, amount
+                );
+            }
             Err(e) => {
                 error!("Error decoding transfer log: {:?}", e);
             }
