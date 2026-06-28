@@ -12,9 +12,9 @@ pub fn init_logging() {
         .with_ansi(false)
         .with_target(true)
         .with_line_number(true)
-        .with_level(true)
-        .with_thread_ids(true)
-        .with_thread_names(true);
+        .with_level(true);
+        // .with_thread_ids(true)
+        // .with_thread_names(true);
 
     let console_layer = fmt::layer()
         .with_writer(std::io::stdout)
@@ -22,7 +22,7 @@ pub fn init_logging() {
         .with_target(true)
         .with_line_number(true);
 
-    let env_filter = EnvFilter::from_default_env().add_directive(Level::INFO.into());
+    let env_filter = EnvFilter::from_default_env().add_directive(Level::DEBUG.into());
 
     tracing_subscriber::registry()
         .with(env_filter)

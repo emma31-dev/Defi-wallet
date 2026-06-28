@@ -1,6 +1,6 @@
 use anyhow::{Context, Result};
 use bwb::handlers::event;
-use bwb::routes::app;
+use bwb::routes::router;
 use bwb::structures::{AppState, EnvVariables};
 use bwb::tracing::init_logging;
 use tracing::info;
@@ -10,8 +10,9 @@ use turso::Builder;
 async fn main() -> Result<()> {
     // initialize logging
     init_logging();
+    let config = EnvVariables::new();
 
-    let db = Builder::new_local("../db/app.db")
+    let db = Builder::new_local(&config.database_url)
         .build()
         .await
         .context("Failed to load db")?;
@@ -20,15 +21,14 @@ async fn main() -> Result<()> {
         .context("Failed to load connection with database")?;
 
     // let (tx, rx) = tokio::sync::mpsc::channel::<Log>(100);
-    let state = AppState { db_conn: conn };
-    let config = EnvVariables::new();
+    let state = AppState { db_conn: conn, config: config.clone() };
 
     let listener = tokio::net::TcpListener::bind(&config.socket).await?;
 
     futures::try_join!(
         async {
             info!("Server starting...");
-            axum::serve(listener, app(state).await)
+            axum::serve(listener, router(state).await)
                 .await
                 .context("Server failed to start")
         },
