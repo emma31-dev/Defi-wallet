@@ -1,5 +1,7 @@
 use tracing_appender::{non_blocking::WorkerGuard, rolling::daily};
-use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt, filter::LevelFilter};
+use tracing_subscriber::{
+    EnvFilter, filter::LevelFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt,
+};
 
 pub fn init_logging() -> WorkerGuard {
     let file_appender = daily("../logs", "app.log");

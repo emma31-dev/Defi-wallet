@@ -1,9 +1,12 @@
-use std::fs::DirEntry;
-use turso::{Connection, Database};
 use anyhow::{Context, Result};
+use std::fs::{DirEntry, read_dir, read_to_string};
+use tracing::info;
+use turso::{Connection, Database};
 
 pub async fn run_migrations(db: &Database) -> Result<Connection> {
-    let mut conn = db.connect().context("Failed to load connection with database")?;
+    let mut conn = db
+        .connect()
+        .context("Failed to load connection with database")?;
 
     // Create a migrations tracking table if it doesn't exist
     conn.execute(
@@ -17,7 +20,7 @@ pub async fn run_migrations(db: &Database) -> Result<Connection> {
     .await?;
 
     // Read migration files from disk (or embed them)
-    let mut migration_files: Vec<DirEntry> = std::fs::read_dir("../migrations")?
+    let mut migration_files: Vec<DirEntry> = read_dir("../migrations")?
         .filter_map(|e| e.ok())
         .filter(|e| e.path().extension().map_or(false, |ext| ext == "sql"))
         .collect();
@@ -27,7 +30,7 @@ pub async fn run_migrations(db: &Database) -> Result<Connection> {
 
     for entry in migration_files {
         let name = entry.file_name().to_string_lossy().to_string();
-        let sql = std::fs::read_to_string(entry.path())?;
+        let sql = read_to_string(entry.path())?;
 
         // Check if already applied
         let already_applied: bool = conn
@@ -42,18 +45,21 @@ pub async fn run_migrations(db: &Database) -> Result<Connection> {
             .unwrap_or(false);
 
         if already_applied {
-            tracing::info!("Skipping already applied migration: {name}");
+            info!("Skipping already applied migration: {name}");
             continue;
         }
 
         // Execute the migration in a transaction
         let tx = conn.transaction().await?;
         tx.execute_batch(&sql).await?;
-        tx.execute("INSERT INTO _migrations (name) VALUES (?1)", [name.as_str()])
-            .await?;
+        tx.execute(
+            "INSERT INTO _migrations (name) VALUES (?1)",
+            [name.as_str()],
+        )
+        .await?;
         tx.commit().await?;
 
-        tracing::info!("Applied migration: {name}");
+        info!("Applied migration: {name}");
     }
 
     Ok(conn)

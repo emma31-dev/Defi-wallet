@@ -1,11 +1,11 @@
 use anyhow::{Context, Result};
+use bwb::db::run_migrations;
 use bwb::handlers::event;
 use bwb::routes::router;
 use bwb::structures::{AppState, EnvVariables};
 use bwb::tracing::init_logging;
 use tracing::info;
 use turso::Builder;
-use bwb::db::run_migrations;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -17,18 +17,19 @@ async fn main() -> Result<()> {
         .build()
         .await
         .context("Failed to load db")?;
-    let conn = run_migrations(&db).await.context("Failed to run migrations with database")?;
+    let conn = run_migrations(&db)
+        .await
+        .context("Failed to run migrations with database")?;
 
     // let (tx, rx) = tokio::sync::mpsc::channel::<Log>(100);
-    let state = AppState {
-        db_conn: conn,
-        config: config.clone(),
-    };
-
-    let listener = tokio::net::TcpListener::bind(&config.socket).await?;
 
     futures::try_join!(
         async {
+            let state = AppState {
+                db_conn: conn,
+                config: config.clone(),
+            };
+            let listener = tokio::net::TcpListener::bind(&config.socket).await?;
             info!("Server starting...");
             axum::serve(listener, router(state).await)
                 .await

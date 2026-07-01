@@ -1,9 +1,9 @@
-[workspace]
-resolver = "2"
-members = [
-    ".",
-    "migration",
-]
+# [workspace]
+# resolver = "2"
+# members = [
+#     ".",
+#     "migration",
+# ]
 
 [package]
 name = "backend"

@@ -1,5 +1,5 @@
+pub mod db;
 pub mod handlers;
 pub mod routes;
 pub mod structures;
 pub mod tracing;
-pub mod db;
