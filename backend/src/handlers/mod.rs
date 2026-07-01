@@ -11,9 +11,9 @@ pub async fn ok<'a>() -> (StatusCode, &'a str) {
 pub async fn rpc_health<'b>(
     State(state): State<AppState>,
 ) -> Result<(StatusCode, &'b str), (StatusCode, &'b str)> {
-    let ws_url = &state.config.rpc_endpoint;
+    let rpc_url = &state.config.rpc_endpoint;
     let provider = ProviderBuilder::new()
-        .connect(ws_url)
+        .connect(rpc_url)
         .await
         .expect("Failed to connect to provider");
 
@@ -26,7 +26,7 @@ pub async fn rpc_health<'b>(
 pub async fn db_health<'c>(
     State(state): State<AppState>,
 ) -> Result<(StatusCode, &'c str), (StatusCode, &'c str)> {
-    match state.db_conn.prepare("SELECT 1 FROM TABLE").await {
+    match state.db_conn.is_autocommit() {
         Ok(_) => Ok((StatusCode::OK, "Healthy")),
         Err(_) => Err((StatusCode::INTERNAL_SERVER_ERROR, "Unhealthy")),
     }

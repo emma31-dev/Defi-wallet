@@ -1,3 +1,4 @@
+use crate::structures::EnvVariables;
 use alloy::{
     primitives::{Address, utils::format_ether},
     providers::{Provider, ProviderBuilder},
@@ -8,8 +9,6 @@ use anyhow::{Context, Result};
 use futures::StreamExt;
 use std::str::FromStr;
 use tracing::{error, info, warn};
-
-use crate::structures::EnvVariables;
 
 sol!(
     #[sol(rpc)] // <-- Important! Generates the necessary `MyContract` struct and function methods.

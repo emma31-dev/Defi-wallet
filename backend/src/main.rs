@@ -9,7 +9,7 @@ use turso::Builder;
 #[tokio::main]
 async fn main() -> Result<()> {
     // initialize logging
-    init_logging();
+    let _guard = init_logging();
     let config = EnvVariables::new();
 
     let db = Builder::new_local(&config.database_url)
