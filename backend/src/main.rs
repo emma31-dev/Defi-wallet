@@ -5,6 +5,7 @@ use bwb::structures::{AppState, EnvVariables};
 use bwb::tracing::init_logging;
 use tracing::info;
 use turso::Builder;
+use bwb::db::run_migrations;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -16,9 +17,7 @@ async fn main() -> Result<()> {
         .build()
         .await
         .context("Failed to load db")?;
-    let conn = db
-        .connect()
-        .context("Failed to load connection with database")?;
+    let conn = run_migrations(&db).await.context("Failed to run migrations with database")?;
 
     // let (tx, rx) = tokio::sync::mpsc::channel::<Log>(100);
     let state = AppState {
